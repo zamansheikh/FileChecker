@@ -14,6 +14,11 @@ function New-MD5Hashes {
     }
     Write-Host "Generating MD5 checksums for: $($files.Count) files (including hidden files) in $(Get-Location)..."
     $counter = 1
+    $totalFiles = $files.Count
+    $okFiles = 0
+    $faildFiles = 0
+    $failedFilesList = @()
+
     # Get all files (including hidden files), excluding the current script and anything in the checks directory
     Get-ChildItem -Path $(Get-Location) -File -Recurse -Force | Where-Object {
         $_.FullName -notlike "*$checksDir*" -and $_.Name -ne $currentScript
@@ -31,6 +36,7 @@ function New-MD5Hashes {
         }
         catch {
             $ok = $false
+            $failedFilesList += $file.FullName
             Write-Warning "Error generating checksum ! Please fix the file name - to cancel the operation, press Ctrl+C."
         }
         #Write a if condition to check if the file is ok or not
@@ -38,13 +44,26 @@ function New-MD5Hashes {
             # Display progress
             Write-Host "[$counter/$($files.Count)] :$($file.FullName) : CHECKS CREATED."
             $counter++
+            $okFiles++
         }
         else {
             # Display progress
             Write-Host "[$counter/$($files.Count)] :$($file.FullName) : FAILED."
             $counter++
+            $faildFiles++
         }
         
+    }
+    # Print result summary
+    if ($failedFilesList -eq 0) {
+        Write-Host "All files match."
+    }
+    else {
+        Write-Host "CHECKS CREATED: $okFiles out of $totalFiles files, $failedFilesList are FAILED."
+        Write-Host "Files that failed to generate checksums:"
+        $failedFilesList | ForEach-Object {
+            Write-Host $_
+        }
     }
 
     Write-Host "MD5 checksums saved in $checksDir"

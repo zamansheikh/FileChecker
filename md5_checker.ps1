@@ -55,11 +55,11 @@ function New-MD5Hashes {
         
     }
     # Print result summary
-    if ($failedFilesList -eq 0) {
-        Write-Host "All files match."
+    if ($faildFiles -eq 0) {
+        Write-Host "All files have been processed successfully.Checksums have been generated for all files."
     }
     else {
-        Write-Host "CHECKS CREATED: $okFiles out of $totalFiles files, $failedFilesList are FAILED."
+        Write-Host "CHECKS CREATED: $okFiles out of $totalFiles files, $faildFiles are FAILED to Create CHECKS."
         Write-Host "Files that failed to generate checksums:"
         $failedFilesList | ForEach-Object {
             Write-Host $_

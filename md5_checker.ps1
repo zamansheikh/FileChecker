@@ -18,15 +18,33 @@ function New-MD5Hashes {
     Get-ChildItem -Path $(Get-Location) -File -Recurse -Force | Where-Object {
         $_.FullName -notlike "*$checksDir*" -and $_.Name -ne $currentScript
     } | ForEach-Object {
+        #bool variable to check ok or not
+        $ok = $true
         $file = $_
-        $checksum = Get-FileHash -Path $file.FullName -Algorithm MD5 | Select-Object Hash
-
-        # Store checksum in a .checks file inside the checks directory, retaining the original extension
-        $outputFile = Join-Path $checksDir -ChildPath ($file.Name + ".checks")
-        $checksum.Hash | Out-File -FilePath $outputFile
-        # Display progress
-        Write-Host "[$counter/$($files.Count)] :$($file.FullName) -> .checks file created."
-        $counter++
+        # Inplement a try-catch block to handle any errors that may occur during the process
+        try {
+            # Calculate the MD5 checksum for the current file
+            $checksum = Get-FileHash -Path $file.FullName -Algorithm MD5 | Select-Object Hash
+            # Store checksum in a .checks file inside the checks directory, retaining the original extension
+            $outputFile = Join-Path $checksDir -ChildPath ($file.Name + ".checks")
+            $checksum.Hash | Out-File -FilePath $outputFile
+        }
+        catch {
+            $ok = $false
+            Write-Warning "Error generating checksum ! Please fix the file name - to cancel the operation, press Ctrl+C."
+        }
+        #Write a if condition to check if the file is ok or not
+        if ($ok) {
+            # Display progress
+            Write-Host "[$counter/$($files.Count)] :$($file.FullName) : CHECKS CREATED."
+            $counter++
+        }
+        else {
+            # Display progress
+            Write-Host "[$counter/$($files.Count)] :$($file.FullName) : FAILED."
+            $counter++
+        }
+        
     }
 
     Write-Host "MD5 checksums saved in $checksDir"

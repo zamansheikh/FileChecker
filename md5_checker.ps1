@@ -25,7 +25,7 @@ function New-MD5Hashes {
         $outputFile = Join-Path $checksDir -ChildPath ($file.Name + ".checks")
         $checksum.Hash | Out-File -FilePath $outputFile
         # Display progress
-        Write-Host "[$counter/$($files.Count)] :$($file.FullName)"
+        Write-Host "[$counter/$($files.Count)] :$($file.FullName) -> .checks file created."
         $counter++
     }
 
